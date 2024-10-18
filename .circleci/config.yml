@@ -5,6 +5,9 @@ jobs:
     docker:
       - image: circleci/python:3.8  # Use an image with git installed
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:gpT9ZMJZfAuhPS6ZTrtPQ4FM6tKX13EEal8hhiSKiNc"
       - checkout
       - run:
           name: Check commit message for release tag

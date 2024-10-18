@@ -21,6 +21,16 @@ jobs:
               exit 0
             fi
       - run:
+          name: Check if tag already exists
+          command: |
+            git fetch --tags  # Fetch all tags from the remote
+            if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+              echo "Tag v$VERSION already exists. Exiting."
+              exit 1  # Fail the job if the tag exists
+            else
+              echo "Tag v$VERSION does not exist. Proceeding."
+            fi
+      - run:
           name: Set Git user for tagging
           command: |
             git config --global user.email "dy.le@swismarketplace.group"

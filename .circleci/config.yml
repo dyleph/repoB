@@ -1,1 +1,40 @@
-## test file B
+version: 2.1
+
+jobs:
+  create_tag:
+    docker:
+      - image: circleci/python:3.8  # Use an image with git installed
+    steps:
+      - checkout
+      - run:
+          name: Check commit message for release tag
+          command: |
+            commit_message=$(git log -1 --pretty=%B)
+            if [[ "$commit_message" =~ Release[[:space:]]([0-9]+\.[0-9]+\.[0-9]+): ]]; then
+              echo "Version detected: ${BASH_REMATCH[1]}"
+              echo "export VERSION=${BASH_REMATCH[1]}" >> $BASH_ENV
+            else
+              echo "No version found in commit message. Skipping tag creation."
+              exit 0
+            fi
+      - run:
+          name: Set Git user for tagging
+          command: |
+            git config --global user.email "dy.le@swismarketplace.group"
+            git config --global user.name "dyleph"
+      - run:
+          name: Create and push the Git tag
+          command: |
+            if [ ! -z "$VERSION" ]; then
+              git tag -a "v$VERSION" -m "Release $VERSION"
+              git push origin "v$VERSION"
+            fi
+
+workflows:
+  version: 2
+  tag_release:
+    jobs:
+      - create_tag:
+          filters:
+            branches:
+              only: main  # Change to your main branch
